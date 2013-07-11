@@ -61,7 +61,7 @@ foreach($decoded[0]['Parts'] as $part){
         $filename = preg_replace('/[^0-9,a-z,\.,_]*/i','',str_replace(' ','_', $part['FileName'])); 
          
         //write the data to the file 
-        $fp = fopen('save_dir/' . $filename, 'w'); 
+        $fp = fopen('../receipts/emailed/' . $filename, 'w'); 
         $written = fwrite($fp,$part['Body']); 
         fclose($fp); 
          

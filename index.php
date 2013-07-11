@@ -6,7 +6,7 @@
 	  session_start();
 	}
 
-	$users = mysql_query("SELECT * FROM users");
+	$users = $db->query('SELECT * FROM users');
 
 ?>
 
@@ -24,11 +24,11 @@
 		<link rel="stylesheet" href="css/main.css">
 	</head>
 	<body>
-		<form method="post" action="upload.php">
+		<form method="post" action="upload.php" enctype="multipart/form-data">
 			<div class="control">
 				<select name="myName">
-					<option value="" disabled selected>Find Thyself</option>
-					<?php while($row = mysql_fetch_array($users)) { ?>
+					<option value="0" disabled selected>Find Thyself</option>
+					<?php foreach($db->query('SELECT * FROM users') as $row) { ?>
 					<option value="<?php echo $row['id']; ?>"><?php echo $row['name']; ?></option>
 					<?php } ?>
 				</select>
