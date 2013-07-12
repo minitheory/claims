@@ -7,7 +7,10 @@
 //include email parser  
 require_once('class/rfc822_addresses.php');  
 require_once('class/mime_parser.php');  
-   
+
+$db = new PDO('mysql:host=localhost;dbname=minith_claims2','minith_admin','qwer1234');
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
 // read email in from stdin  
 $fd = fopen("php://stdin", "r");  
 $email = "";  
@@ -49,6 +52,24 @@ $messageID = str_replace($removeChars,'',$decoded[0]['Headers']['message-id:']);
 $replyToID = str_replace($removeChars,'',$decoded[0]['Headers']['in-reply-to:']);  
 
 
+
+//-------------------- check if matches any user in DB --------------------//
+$nameQuery = $db->query("SELECT * FROM users WHERE email = '$fromEmail'");
+$result = $nameQuery->fetch();
+
+$resultName = $result['name'];
+//no existing user found
+if ($resultName == ''){
+    $userName = 'anonymous';
+    $matched = false;
+}
+//existing user matched
+else{ 
+    $userName = $resultName;
+    $matched = true;
+} 
+
+
 //------------------------ ATTACHMENTS ------------------------------------//  
   
 //loop through email parts  
@@ -59,9 +80,13 @@ foreach($decoded[0]['Parts'] as $part){
           
         //format file name (change spaces to underscore then remove anything that isn't a letter, number or underscore)  
         $filename = preg_replace('/[^0-9,a-z,\.,_]*/i','',str_replace(' ','_', $part['FileName'])); 
-         
-        //write the data to the file 
-        $fp = fopen('../receipts/emailed/' . $filename, 'w'); 
+        $extension = end(explode(".", $filename));
+        
+        //write the data to the file
+        $date = new  DateTime();
+        $savedName = date_format($date, 'Ymd-His-').$userName.".".$extension;
+        $savedURI = 'receipts/emailed/'.$savedName;
+        $fp = fopen('../'.$savedURI, 'w'); 
         $written = fwrite($fp,$part['Body']); 
         fclose($fp); 
          
@@ -70,7 +95,23 @@ foreach($decoded[0]['Parts'] as $part){
   
     }  
   
-}  
+}
+try{
+    if($matched == false){
+        $insertAnonymous = $db->prepare("INSERT INTO anonymous (name,email,image,status) VALUES (:name,:email,:image,0)");
+        $insertAnonymous->execute(array(':name'=>$fromName, ':email'=>$fromEmail, ':image'=>$savedURI));
+    }
+
+    elseif ($matched == true) {
+        $updateItem = $db->prepare("UPDATE items SET image=:image WHERE userid=:userid");
+        $updateItem->execute(array(':image'=>$savedURI,':userid'=>$result['id']));
+    }    
+} catch (PDOException $e){
+    echo 'Query failed: ' . $e->getMessage();
+}
+
+
+
   
 //print out the attachments for debug  
 //print_r($attachments);  

@@ -1,10 +1,10 @@
-<?php 
-// include info for db connection
-	require_once('connections/dbconn.php');
-	
+<?php 	
 	if (!isset($_SESSION)) {
 	  session_start();
 	}
+
+	// include info for db connection
+	require_once('connections/dbconn.php');
 
 	$users = $db->query('SELECT * FROM users');
 
@@ -28,7 +28,7 @@
 			<div class="control">
 				<select name="myName">
 					<option value="0" disabled selected>Find Thyself</option>
-					<?php foreach($db->query('SELECT * FROM users') as $row) { ?>
+					<?php foreach($users as $row) { ?>
 					<option value="<?php echo $row['id']; ?>"><?php echo $row['name']; ?></option>
 					<?php } ?>
 				</select>
@@ -40,7 +40,10 @@
 				<input type="file" capture="camera" accept="image/*" name="myFile" />
 			</div>
 			<div class="control">
-				<button type="submit">Submit Claim</button>
+				<button type="submit" name="submit" value="submit">Submit Claim</button>
+			</div>
+			<div class="control">
+				<button type="submit" name="submit" value="check">Check Claim</button>
 			</div>
 		</form>
 	</body>
