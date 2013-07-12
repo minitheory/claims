@@ -44,7 +44,7 @@ if ((($_FILES["myFile"]["type"] == "image/gif")
 	    	$date = new  DateTime();
 	    	$savedURI = $uploadDir . date_format($date, 'Ymd-His-'). $personName .'.'. $extension;
 		    move_uploaded_file($_FILES["myFile"]["tmp_name"], $savedURI);
-		    echo "Stored in: " . $savedURI;
+		    //echo "Stored in: " . $savedURI;
 		    $hasPhoto = true;
 	    }
     }
@@ -54,7 +54,7 @@ if ((($_FILES["myFile"]["type"] == "image/gif")
 else {
 	$savedURI='';
 	$hasPhoto = false;
- 	echo 'no image';
+ 	//echo 'no image';
 }
 
     $query="INSERT INTO items (userid, amount, image) VALUES ('$personID', '$personAmount', '$savedURI')";
@@ -62,10 +62,10 @@ else {
 
 ?>
 
-You, <?php echo $personName ?>, have submitted a claim for $<?php echo $personAmount ?>.
+You, <?php echo $personName ?>, have submitted a claim for $<?php echo $personAmount ?>. 
 <?php if($hasPhoto){
 	?>
-	You have uploaded an image.
+	Image successfully uploaded.
 	<?php
 } else{
 	?>
@@ -73,3 +73,5 @@ You, <?php echo $personName ?>, have submitted a claim for $<?php echo $personAm
 	<?php
 }
 ?>
+
+<a href="view.php?id=<?php echo $personID ?>">View my claims</a>
